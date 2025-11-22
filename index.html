@@ -1,524 +1,1053 @@
 <!DOCTYPE html>
+
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XDNBWCQ7QP"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
 
-      gtag('config', 'G-XDNBWCQ7QP');
-    </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORYX Studio - Conversor de Lenguaje Natural a ORYX</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css" rel="stylesheet" />
+    <meta charset="UTF-8">
 
-    <style>
-        /* Variables y Estilos Base */
-        :root {
-            --primary: #00A8E8; /* Cyan principal */
-            --accent: #00D4FF; /* Aqua brillante */
-            --dark-bg: #0F1419;
-            --card-bg: #1A1F2E;
-            --border: #2A3142;
-            --success: #10B981; /* Verde esmeralda */
-            --error: #EF4444; /* Rojo fuerte */
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--dark-bg);
-            color: #E8ECEF;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    <title>ORYX Studio - Conversor de Lenguaje Natural a ORYX</title>
 
-        /* Estilos específicos del Header/Logo */
-        .logo-text {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    <!-- Tailwind CSS CDN -->
 
-        /* Estilos del área de trabajo */
-        .workspace {
-            display: grid;
-            grid-template-columns: 1fr;
-        }
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        @media (min-width: 1024px) {
-            .workspace {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
+    <!-- Incluir fuente Inter -->
 
-        /* Estilos del Panel de Código */
-        .code-panel {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
-        .code-panel:hover {
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
-        }
+    
 
-        /* Textareas y Pre (Contenedores de Código) */
-        textarea, pre {
-            background-color: #0F1419;
-            border: 1px solid #2A3142;
-            font-family: 'Courier New', monospace;
-            font-size: 0.875rem;
-            min-height: 250px;
-            overflow: auto;
-            margin: 0 !important; /* Anula margin de Prism */
-            padding: 1rem !important; /* Anula padding de Prism */
-        }
+    <!-- Prism.js CSS (Tema Oscuro para Syntax Highlighting) -->
 
-        /* Resaltado de Sintaxis para ORYX */
-        .language-oryx {
-            color: #E8ECEF; /* Blanco principal */
-        }
-        .language-oryx .token.property,
-        .language-oryx .token.selector,
-        .language-oryx .token.comment {
-            color: var(--accent); /* Claves ORYX en aqua */
-        }
-        .language-oryx .token.boolean,
-        .language-oryx .token.number {
-            color: var(--primary); /* Números/Bool en cyan */
-        }
-        .language-oryx .token.string {
-            color: var(--success); /* Strings en verde */
-        }
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css" rel="stylesheet" />
 
-        /* Resaltado de Sintaxis para JSON (Prism default es bueno, pero lo ajustamos) */
-        #jsonOutput.language-json {
-            color: #E8ECEF;
-        }
 
-        /* Color de error para el borde del ORYX */
-        .error-border {
-            border: 2px solid var(--error) !important;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
-        }
 
-        /* Estilos del botón de acción */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: var(--dark-bg);
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 168, 232, 0.3);
-        }
+    <style>
 
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.5);
-        }
+        /* Variables y Estilos Base */
 
-        /* Indicador de carga */
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-left-color: var(--accent);
-            border-radius: 50%;
-            width: 1.5rem;
-            height: 1.5rem;
-            animation: spin 1s linear infinite;
-        }
+        :root {
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+            --primary: #00A8E8; /* Cyan principal */
 
-        /* Estilo para los botones de descarga */
-        .download-btn {
-            background-color: var(--border);
-            color: #E8ECEF;
-            transition: background-color 0.2s;
-        }
+            --accent: #00D4FF; /* Aqua brillante */
 
-        .download-btn:hover {
-            background-color: var(--primary-dark);
-        }
+            --dark-bg: #0F1419;
 
-        .download-btn-json {
-            background-color: var(--success);
-            color: var(--dark-bg);
-        }
-        .download-btn-json:hover {
-            background-color: #059669;
-        }
-    </style>
+            --card-bg: #1A1F2E;
+
+            --border: #2A3142;
+
+            --success: #10B981; /* Verde esmeralda */
+
+            --error: #EF4444; /* Rojo fuerte */
+
+        }
+
+
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            background-color: var(--dark-bg);
+
+            color: #E8ECEF;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+
+        /* Estilos específicos del Header/Logo */
+
+        .logo-text {
+
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+
+            -webkit-background-clip: text;
+
+            -webkit-text-fill-color: transparent;
+
+            background-clip: text;
+
+        }
+
+
+
+        /* Estilos del área de trabajo */
+
+        .workspace {
+
+            display: grid;
+
+            grid-template-columns: 1fr;
+
+            gap: 1.5rem;
+
+        }
+
+
+
+        @media (min-width: 1024px) {
+
+            .workspace {
+
+                grid-template-columns: repeat(3, 1fr);
+
+            }
+
+        }
+
+
+
+        /* Estilos del Panel de Código */
+
+        .code-panel {
+
+            background-color: var(--card-bg);
+
+            border: 1px solid var(--border);
+
+            transition: all 0.3s ease;
+
+        }
+
+
+
+        .code-panel:hover {
+
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+
+        }
+
+
+
+        /* Textareas y Pre (Contenedores de Código) */
+
+        textarea, pre {
+
+            background-color: #0F1419;
+
+            border: 1px solid #2A3142;
+
+            font-family: 'Courier New', monospace;
+
+            font-size: 0.875rem;
+
+            min-height: 250px;
+
+            overflow: auto;
+
+            margin: 0 !important; /* Anula margin de Prism */
+
+            padding: 1rem !important; /* Anula padding de Prism */
+
+        }
+
+
+
+        /* Resaltado de Sintaxis para ORYX */
+
+        .language-oryx {
+
+            color: #E8ECEF; /* Blanco principal */
+
+        }
+
+        .language-oryx .token.property,
+
+        .language-oryx .token.selector,
+
+        .language-oryx .token.comment {
+
+            color: var(--accent); /* Claves ORYX en aqua */
+
+        }
+
+        .language-oryx .token.boolean,
+
+        .language-oryx .token.number {
+
+            color: var(--primary); /* Números/Bool en cyan */
+
+        }
+
+        .language-oryx .token.string {
+
+            color: var(--success); /* Strings en verde */
+
+        }
+
+
+
+        /* Resaltado de Sintaxis para JSON (Prism default es bueno, pero lo ajustamos) */
+
+        #jsonOutput.language-json {
+
+            color: #E8ECEF;
+
+        }
+
+
+
+        /* Color de error para el borde del ORYX */
+
+        .error-border {
+
+            border: 2px solid var(--error) !important;
+
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+
+        }
+
+
+
+        /* Estilos del botón de acción */
+
+        .btn-primary {
+
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+
+            color: var(--dark-bg);
+
+            font-weight: 700;
+
+            transition: all 0.3s ease;
+
+            box-shadow: 0 5px 15px rgba(0, 168, 232, 0.3);
+
+        }
+
+
+
+        .btn-primary:hover {
+
+            opacity: 0.9;
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.5);
+
+        }
+
+
+
+        /* Indicador de carga */
+
+        .spinner {
+
+            border: 4px solid rgba(255, 255, 255, 0.1);
+
+            border-left-color: var(--accent);
+
+            border-radius: 50%;
+
+            width: 1.5rem;
+
+            height: 1.5rem;
+
+            animation: spin 1s linear infinite;
+
+        }
+
+
+
+        @keyframes spin {
+
+            to { transform: rotate(360deg); }
+
+        }
+
+
+
+        /* Estilo para los botones de descarga */
+
+        .download-btn {
+
+            background-color: var(--border);
+
+            color: #E8ECEF;
+
+            transition: background-color 0.2s;
+
+        }
+
+
+
+        .download-btn:hover {
+
+            background-color: var(--primary-dark);
+
+        }
+
+
+
+        .download-btn-json {
+
+            background-color: var(--success);
+
+            color: var(--dark-bg);
+
+        }
+
+        .download-btn-json:hover {
+
+            background-color: #059669;
+
+        }
+
+    </style>
+
 </head>
+
 <body class="p-4 md:p-8">
 
-    <header class="text-center mb-8">
-        <h1 class="4xl font-extrabold mb-2 logo-text">ORYX Studio </h1>
-        <p class="text-xl text-gray-400">Traductor de Lenguaje Natural a <span class="text-white font-semibold">ORYX v0.1</span></p>
-        <p class="text-sm text-gray-500 mt-2">Convierte descripciones de datos en texto eficiente para ahorrar tokens de API.</p>
-    </header>
 
-    <main class="flex-grow">
-        <div class="workspace">
-                        <div class="code-panel p-4 rounded-xl">
-                <h2 class="text-lg font-bold mb-3 text-white">1. Describe tus Datos</h2>
-                <p class="text-xs text-gray-400 mb-3" id="inputDescription">
-                    (Modo: Lenguaje Natural) Ej: "Quiero una lista de 5 productos con su id, nombre y precio. Los productos son: Laptop (1, 999.99) y Mouse (2, 25.50)."
-                </p>
-                                <textarea id="naturalInput" class="w-full p-3 rounded-lg resize-none" rows="10" placeholder="Describe aquí la estructura de datos que necesitas... o pega tu JSON aquí para la conversión inversa."></textarea>
-                
-                <div class="flex flex-col gap-2 mt-3">
-                    <button id="convertButton" class="btn-primary w-full py-2 rounded-lg flex items-center justify-center gap-2" onclick="handleConversion('natural')">
-                        <span id="buttonText">🤖 Generar ORYX (Desde Lenguaje Natural)</span>
-                        <div id="spinner" class="spinner hidden"></div>
-                    </button>
-                    <button id="reverseButton" class="btn-secondary w-full py-2 rounded-lg flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold" onclick="handleConversion('json')">
-                        <span>🔄 Convertir ORYX (Desde JSON Pegado)</span>
-                    </button>
-                </div>
-            </div>
 
-                        <div class="code-panel p-4 rounded-xl relative">
-                <h2 class="text-lg font-bold mb-3 text-white flex justify-between items-center">
-                    <span>2. Formato ORYX (Token Eficiente)</span>
-                    <span id="tokenSavings" class="text-xs font-normal px-2 py-1 rounded-full bg-green-900 text-green-300 hidden"></span>
-                </h2>
-                                <pre id="oryxOutput" class="w-full p-3 rounded-lg whitespace-pre-wrap language-oryx"></pre>
-                <div class="flex justify-end mt-2">
-                    <button id="downloadOryx" class="download-btn px-4 py-1 rounded-lg text-xs" disabled onclick="downloadFile('data.oryx', oryxOutput.textContent)">
-                        📥 Descargar .oryx
-                    </button>
-                </div>
-                <p class="text-xs text-gray-400 mt-2">Este formato reduce la redundancia para **maximizar el espacio de tokens** en las llamadas a la API de tu LLM.</p>
-            </div>
+    <header class="text-center mb-8">
 
-                        <div class="code-panel p-4 rounded-xl relative">
-                <h2 class="text-lg font-bold mb-3 text-white">3. Estructura JSON (Validación)</h2>
-                                <pre id="jsonOutput" class="w-full p-3 rounded-lg whitespace-pre-wrap language-json"></pre>
-                <div class="flex justify-end mt-2">
-                    <button id="downloadJson" class="download-btn download-btn-json px-4 py-1 rounded-lg text-xs" disabled onclick="downloadFile('data.json', jsonOutput.textContent)">
-                        📥 Descargar .json
-                    </button>
-                </div>
-                <p class="text-xs text-gray-400 mt-2">ORYX garantiza el **Mapeo 1:1** con JSON, asegurando que la estructura de datos sea correcta y universalmente compatible.</p>
-            </div>
-        </div>
-    </main>
+        <h1 class="4xl font-extrabold mb-2 logo-text">ORYX Studio </h1>
 
-    <footer class="mt-8 text-center text-sm text-gray-500 border-t border-gray-800 pt-4">
-        <p>ORYX Studio basado en la Especificación v0.1 (Licencia MIT) | Creado para el ahorro de tokens y la eficiencia. <br>
-        *Nota: La tokenización es simulada por motivos de entorno (sin acceso a librerías de terceros como tiktoken).</p>
-    </footer>
+        <p class="text-xl text-gray-400">Traductor de Lenguaje Natural a <span class="text-white font-semibold">ORYX v0.1</span></p>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <script>
-        // Definición de lenguaje ORYX (simulado) para Prism
-        Prism.languages.oryx = {
-            'comment': {
-                pattern: /(^|[^\\:])#.*/,
-                lookbehind: true,
-                greedy: true
-            },
-            'directive': {
-                pattern: /@alias|@block/,
-                alias: 'comment'
-            },
-            'collection-header': {
-                pattern: /(\w+)\[\d+\]\{.*?\}:/,
-                alias: 'selector'
-            },
-            'key': {
-                pattern: /[\w\s-]+(?=\s*:)/,
-                alias: 'property'
-            },
-            'boolean': /\b(?:true|false)\b/,
-            'number': /\b\d+(\.\d+)?\b/,
-            'string': {
-                pattern: /"(?:\\.|[^"\\])*"/,
-                greedy: true
-            }
-        };
+        <p class="text-sm text-gray-500 mt-2">Convierte descripciones de datos en texto eficiente para ahorrar tokens de API.</p>
 
-        const apiKey = ""; 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    </header>
 
-        // Contenedores de UI
-        const naturalInput = document.getElementById('naturalInput');
-        const oryxOutput = document.getElementById('oryxOutput');
-        const jsonOutput = document.getElementById('jsonOutput');
-        const convertButton = document.getElementById('convertButton');
-        const reverseButton = document.getElementById('reverseButton');
-        const buttonText = document.getElementById('buttonText');
-        const spinner = document.getElementById('spinner');
-        const tokenSavings = document.getElementById('tokenSavings');
-        const downloadOryx = document.getElementById('downloadOryx');
-        const downloadJson = document.getElementById('downloadJson');
 
-        // Función para contar tokens (Proxy para tiktoken)
-        function countTokens(text) {
-            if (!text) return 0;
-            // Proxy robusto: cuenta palabras, números, delimitadores estructurales y signos de puntuación.
-            return text.match(/[^\\s,;:{}\[\]"']+|[,;:{}\[\]"']/g)?.length || 0;
-        }
 
-        // ----------------------------------------------------------------------
-        // Prompts para el LLM
-        // ----------------------------------------------------------------------
+    <main class="flex-grow">
 
-        // Especificación ORYX v0.1 para guiar la generación (Modo 1: Natural -> ORYX)
-        const ORYX_SPEC_NATURAL = `
-            Eres un codificador de datos ORYX v0.1. Tu única tarea es convertir la descripción de datos en lenguaje natural a la representación de datos ORYX COMPACTA, utilizando la sintaxis exacta.
-            Reglas clave de la sintaxis ORYX v0.1 para la respuesta:
-            1. Prioriza la sintaxis tabular (ej: 'coleccion[N]{clave1,clave2}:\n  1, valorA, valorB') para listas de objetos.
-            2. Utiliza indentación de dos espacios.
-            3. Aplica el bloque @alias para reducir claves largas (ej: 'productos[N]{i,n,p}'). Si usas alias, defínelo primero: '@alias { id:i, nombre:n }'.
-            4. No uses comillas a menos que un string contenga comas o caracteres ambiguos.
-            5. Genera SOLAMENTE el texto en formato ORYX, sin ninguna explicación, introducción o texto adicional.
-            Ejemplo de salida tabular:
-            @alias { id:i, nombre:n }
-            usuarios[2]{i,n,activo}:
-              1, Luis, true
-              2, Ana, false
-        `;
+        <div class="workspace">
 
-        // Prompt para la Conversión Inversa (Modo 2: JSON -> ORYX)
-        const ORYX_SPEC_JSON = `
-            Eres un codificador de datos ORYX v0.1. Tu única tarea es convertir la estructura de datos JSON proporcionada a la representación de datos ORYX COMPACTA, aplicando la máxima optimización tabular y alias (@alias) para reducir el consumo de tokens.
-            Reglas clave de la sintaxis ORYX v0.1 para la respuesta:
-            1.  Identifica colecciones de objetos homogéneos y usa la sintaxis tabular (ej: 'coleccion[N]{clave1,clave2}:\n  1, valorA, valorB').
-            2.  Aplica el bloque @alias para cualquier clave que se repita más de dos veces en la colección.
-            3.  Utiliza indentación de dos espacios.
-            4.  Genera SOLAMENTE el texto en formato ORYX, sin ninguna explicación, introducción o texto adicional.
-        `;
-        
-        // ----------------------------------------------------------------------
-        // SIMULACIÓN DE PARSING ORYX A JSON (Para fines de validación en la UI)
-        // ----------------------------------------------------------------------
+            <!-- Panel 1: Entrada de Lenguaje Natural / JSON -->
 
-        function simulateOryxToJson(oryxText) {
-            const lines = oryxText.split('\n').filter(line => line.trim() && !line.trim().startsWith('#'));
-            let json = {};
-            let currentAlias = {};
-            let isParsingTable = false;
-            let currentCollection = null;
-            let currentKeys = [];
+            <div class="code-panel p-4 rounded-xl">
 
-            try {
-                for (let line of lines) {
-                    line = line.trimStart(); // Respeta indentación para objetos simples
+                <h2 class="text-lg font-bold mb-3 text-white">1. Describe tus Datos</h2>
 
-                    // 1. Manejar Alias
-                    if (line.startsWith('@alias')) {
-                        const aliasMatch = line.match(/@alias\s*\{(.*?)\}/);
-                        if (aliasMatch) {
-                            const cleanedAlias = '{' + aliasMatch[1].replace(/(\w+):(\w+)/g, '"$1":"$2"') + '}';
-                            currentAlias = JSON.parse(cleanedAlias);
-                        }
-                        continue;
-                    }
-                    
-                    // 2. Detectar colecciones tabulares (ej: usuarios[2]{id,nombre}:)
-                    const collectionMatch = line.match(/^(\w+)\[\d+\]\{(.*?)\}:$/);
-                    if (collectionMatch) {
-                        currentCollection = collectionMatch[1];
-                        currentKeys = collectionMatch[2].split(',').map(k => k.trim());
-                        json[currentCollection] = [];
-                        isParsingTable = true;
-                        continue;
-                    }
+                <p class="text-xs text-gray-400 mb-3" id="inputDescription">
 
-                    // 3. Parsear filas de colecciones (Indentación de 2 espacios)
-                    if (isParsingTable && line.startsWith('  ') && !line.includes(':')) {
-                        const dataLine = line.trim();
-                        const values = dataLine.split(',').map(v => v.trim());
-                        let obj = {};
+                    (Modo: Lenguaje Natural) Ej: "Quiero una lista de 5 productos con su id, nombre y precio. Los productos son: Laptop (1, 999.99) y Mouse (2, 25.50)."
 
-                        if (values.length !== currentKeys.length) throw new Error(`Mismatched columns: Expected ${currentKeys.length}, found ${values.length} in row "${dataLine}"`);
+                </p>
 
-                        values.forEach((val, index) => {
-                            const key = currentKeys[index];
-                            const originalKey = currentAlias[key] || key;
-                            let processedValue = val;
+                <!-- CAMPO DE TEXTO LIMPIO -->
 
-                            // Simulación de inferencia de tipos (más robusta)
-                            if (processedValue === 'true') processedValue = true;
-                            else if (processedValue === 'false') processedValue = false;
-                            else if (processedValue.match(/^-?\d+$/)) processedValue = parseInt(processedValue);
-                            else if (processedValue.match(/^-?\d+\.\d+$/)) processedValue = parseFloat(processedValue);
-                            else if (processedValue.startsWith('"') && processedValue.endsWith('"')) processedValue = processedValue.slice(1, -1);
-                            
-                            obj[originalKey] = processedValue;
-                        });
-                        json[currentCollection].push(obj);
-                    } else if (isParsingTable && !line.startsWith('  ') && line.includes(':')) {
-                        // Un nuevo bloque comienza sin indentación, la tabla termina
-                         isParsingTable = false;
-                         currentCollection = null;
-                         currentKeys = [];
-                    }
-                    
-                    // 4. Manejar objetos simples (no anidados)
-                    const kvMatch = line.match(/^(\w+):\s*(.*)$/);
-                    if (kvMatch && !isParsingTable) {
-                        const key = kvMatch[1].trim();
-                        const val = kvMatch[2].trim();
-                        
-                        let processedValue = val;
-                        if (processedValue === 'true') processedValue = true;
-                        else if (processedValue === 'false') processedValue = false;
-                        else if (processedValue.match(/^-?\d+$/)) processedValue = parseInt(processedValue);
-                        else if (processedValue.match(/^-?\d+\.\d+$/)) processedValue = parseFloat(processedValue);
-                        
-                        // Añade al nivel superior
-                        json[key] = processedValue;
-                    }
-                }
-            } catch (e) {
-                console.error("Error en la simulación de parsing ORYX:", e.message);
-                return `{"error": "Simulación de JSON fallida: ${e.message}. Por favor, revisa la sintaxis ORYX."}`;
-            }
+                <textarea id="naturalInput" class="w-full p-3 rounded-lg resize-none" rows="10" placeholder="Describe aquí la estructura de datos que necesitas... o pega tu JSON aquí para la conversión inversa."></textarea>
 
-            return JSON.stringify(json, null, 2);
-        }
+                
 
-        // ----------------------------------------------------------------------
-        // Lógica principal de la aplicación (Conversión LLM)
-        // ----------------------------------------------------------------------
+                <div class="flex flex-col gap-2 mt-3">
 
-        async function handleConversion(mode) {
-            const input = naturalInput.value.trim();
-            if (!input) {
-                jsonOutput.textContent = "Por favor, ingresa datos para comenzar la conversión.";
-                return;
-            }
+                    <button id="convertButton" class="btn-primary w-full py-2 rounded-lg flex items-center justify-center gap-2" onclick="handleConversion('natural')">
 
-            // Determinar prompt y mensaje
-            let systemPrompt;
-            let userPrompt;
-            if (mode === 'json') {
-                systemPrompt = ORYX_SPEC_JSON;
-                userPrompt = `Convierte este JSON a ORYX v0.1: \n\n ${input}`;
-                buttonText.textContent = "Generando ORYX desde JSON...";
-            } else { // mode === 'natural'
-                systemPrompt = ORYX_SPEC_NATURAL;
-                userPrompt = `Convierte esta descripción a ORYX v0.1: ${input}`;
-                buttonText.textContent = "Generando ORYX desde Lenguaje Natural...";
-            }
+                        <span id="buttonText">🤖 Generar ORYX (Desde Lenguaje Natural)</span>
 
-            // UI: Iniciar carga
-            convertButton.disabled = true;
-            reverseButton.disabled = true;
-            spinner.classList.remove('hidden');
-            oryxOutput.textContent = "";
-            jsonOutput.textContent = "";
-            tokenSavings.classList.add('hidden');
-            oryxOutput.classList.remove('error-border');
-            downloadOryx.disabled = true;
-            downloadJson.disabled = true;
+                        <div id="spinner" class="spinner hidden"></div>
 
-            // 1. Llamada a la API de Gemini con reintentos
-            let resultText = "Error al generar el formato ORYX.";
-            let attempt = 0;
-            const maxAttempts = 3;
+                    </button>
 
-            while (attempt < maxAttempts) {
-                try {
-                    const payload = {
-                        contents: [{ parts: [{ text: userPrompt }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                    };
+                    <button id="reverseButton" class="btn-secondary w-full py-2 rounded-lg flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold" onclick="handleConversion('json')">
 
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+                        <span>🔄 Convertir ORYX (Desde JSON Pegado)</span>
 
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    </button>
 
-                    const result = await response.json();
-                    resultText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Respuesta vacía o inesperada.";
-                    break; 
+                </div>
 
-                } catch (error) {
-                    console.error(`Intento ${attempt + 1} fallido:`, error);
-                    attempt++;
-                    if (attempt < maxAttempts) {
-                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000)); // Espera exponencial
-                    }
-                }
-            }
+            </div>
 
-            // 2. Procesar y Resaltar ORYX
-            oryxOutput.textContent = resultText;
-            Prism.highlightElement(oryxOutput);
-            
-            // 3. Calcular tokens y validar JSON
-            if (!resultText.startsWith("Error")) {
-                const oryxTokens = countTokens(resultText); 
-                const jsonRepresentation = simulateOryxToJson(resultText);
-                jsonOutput.textContent = jsonRepresentation;
-                Prism.highlightElement(jsonOutput);
-                
-                // 4. Manejo de Errores de Simulación y Ahorro
-                if (jsonRepresentation.includes("Simulación de JSON fallida")) {
-                    tokenSavings.textContent = `Ahorro (Simulado): --%`;
-                    tokenSavings.classList.remove('bg-green-900', 'text-green-300');
-                    tokenSavings.classList.add('bg-red-900', 'text-red-300');
-                    oryxOutput.classList.add('error-border'); // Resaltar error
-                } else {
-                    const jsonTokens = countTokens(jsonRepresentation);
-                    const savings = Math.round(((jsonTokens - oryxTokens) / jsonTokens) * 100);
-                    
-                    tokenSavings.textContent = `Ahorro (Simulado): ${savings}%`;
-                    tokenSavings.classList.remove('hidden', 'bg-red-900', 'text-red-300');
-                    tokenSavings.classList.add('bg-green-900', 'text-green-300');
 
-                    // Habilitar descargas
-                    downloadOryx.disabled = false;
-                    downloadJson.disabled = false;
-                }
-            } else {
-                jsonOutput.textContent = "No se pudo validar el JSON debido al error de generación ORYX.";
-                Prism.highlightElement(jsonOutput);
-            }
 
-            // UI: Finalizar carga
-            convertButton.disabled = false;
-            reverseButton.disabled = false;
-            spinner.classList.add('hidden');
-            
-            // Restaurar texto del botón principal
-            if (mode === 'natural') {
-                buttonText.textContent = "🤖 Generar ORYX (Desde Lenguaje Natural)";
-            } else {
-                buttonText.textContent = "🔄 Convertir ORYX (Desde JSON Pegado)";
-            }
-        }
+            <!-- Panel 2: Salida ORYX (Compresión y Ahorro) -->
 
-        // ----------------------------------------------------------------------
-        // Función de Descarga de Archivos
-        // ----------------------------------------------------------------------
-        function downloadFile(filename, content) {
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-    </script>
+            <div class="code-panel p-4 rounded-xl relative">
+
+                <h2 class="text-lg font-bold mb-3 text-white flex justify-between items-center">
+
+                    <span>2. Formato ORYX (Token Eficiente)</span>
+
+                    <span id="tokenSavings" class="text-xs font-normal px-2 py-1 rounded-full bg-green-900 text-green-300 hidden"></span>
+
+                </h2>
+
+                <!-- CAMPOS DE SALIDA VACÍOS -->
+
+                <pre id="oryxOutput" class="w-full p-3 rounded-lg whitespace-pre-wrap language-oryx"></pre>
+
+                <div class="flex justify-end mt-2">
+
+                    <button id="downloadOryx" class="download-btn px-4 py-1 rounded-lg text-xs" disabled onclick="downloadFile('data.oryx', oryxOutput.textContent)">
+
+                        📥 Descargar .oryx
+
+                    </button>
+
+                </div>
+
+                <p class="text-xs text-gray-400 mt-2">Este formato reduce la redundancia para **maximizar el espacio de tokens** en las llamadas a la API de tu LLM.</p>
+
+            </div>
+
+
+
+            <!-- Panel 3: Salida JSON (Validación y Mapeo) -->
+
+            <div class="code-panel p-4 rounded-xl relative">
+
+                <h2 class="text-lg font-bold mb-3 text-white">3. Estructura JSON (Validación)</h2>
+
+                <!-- CAMPOS DE SALIDA VACÍOS -->
+
+                <pre id="jsonOutput" class="w-full p-3 rounded-lg whitespace-pre-wrap language-json"></pre>
+
+                <div class="flex justify-end mt-2">
+
+                    <button id="downloadJson" class="download-btn download-btn-json px-4 py-1 rounded-lg text-xs" disabled onclick="downloadFile('data.json', jsonOutput.textContent)">
+
+                        📥 Descargar .json
+
+                    </button>
+
+                </div>
+
+                <p class="text-xs text-gray-400 mt-2">ORYX garantiza el **Mapeo 1:1** con JSON, asegurando que la estructura de datos sea correcta y universalmente compatible.</p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+
+    <footer class="mt-8 text-center text-sm text-gray-500 border-t border-gray-800 pt-4">
+
+        <p>ORYX Studio basado en la Especificación v0.1 (Licencia MIT) | Creado para el ahorro de tokens y la eficiencia. <br>
+
+        *Nota: La tokenización es simulada por motivos de entorno (sin acceso a librerías de terceros como tiktoken).</p>
+
+    </footer>
+
+
+
+    <!-- Prism.js JS -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+    <script>
+
+        // Definición de lenguaje ORYX (simulado) para Prism
+
+        Prism.languages.oryx = {
+
+            'comment': {
+
+                pattern: /(^|[^\\:])#.*/,
+
+                lookbehind: true,
+
+                greedy: true
+
+            },
+
+            'directive': {
+
+                pattern: /@alias|@block/,
+
+                alias: 'comment'
+
+            },
+
+            'collection-header': {
+
+                pattern: /(\w+)\[\d+\]\{.*?\}:/,
+
+                alias: 'selector'
+
+            },
+
+            'key': {
+
+                pattern: /[\w\s-]+(?=\s*:)/,
+
+                alias: 'property'
+
+            },
+
+            'boolean': /\b(?:true|false)\b/,
+
+            'number': /\b\d+(\.\d+)?\b/,
+
+            'string': {
+
+                pattern: /"(?:\\.|[^"\\])*"/,
+
+                greedy: true
+
+            }
+
+        };
+
+
+
+        const apiKey = ""; 
+
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+
+
+        // Contenedores de UI
+
+        const naturalInput = document.getElementById('naturalInput');
+
+        const oryxOutput = document.getElementById('oryxOutput');
+
+        const jsonOutput = document.getElementById('jsonOutput');
+
+        const convertButton = document.getElementById('convertButton');
+
+        const reverseButton = document.getElementById('reverseButton');
+
+        const buttonText = document.getElementById('buttonText');
+
+        const spinner = document.getElementById('spinner');
+
+        const tokenSavings = document.getElementById('tokenSavings');
+
+        const downloadOryx = document.getElementById('downloadOryx');
+
+        const downloadJson = document.getElementById('downloadJson');
+
+
+
+        // Función para contar tokens (Proxy para tiktoken)
+
+        function countTokens(text) {
+
+            if (!text) return 0;
+
+            // Proxy robusto: cuenta palabras, números, delimitadores estructurales y signos de puntuación.
+
+            return text.match(/[^\\s,;:{}\[\]"']+|[,;:{}\[\]"']/g)?.length || 0;
+
+        }
+
+
+
+        // ----------------------------------------------------------------------
+
+        // Prompts para el LLM
+
+        // ----------------------------------------------------------------------
+
+
+
+        // Especificación ORYX v0.1 para guiar la generación (Modo 1: Natural -> ORYX)
+
+        const ORYX_SPEC_NATURAL = `
+
+            Eres un codificador de datos ORYX v0.1. Tu única tarea es convertir la descripción de datos en lenguaje natural a la representación de datos ORYX COMPACTA, utilizando la sintaxis exacta.
+
+            Reglas clave de la sintaxis ORYX v0.1 para la respuesta:
+
+            1. Prioriza la sintaxis tabular (ej: 'coleccion[N]{clave1,clave2}:\n  1, valorA, valorB') para listas de objetos.
+
+            2. Utiliza indentación de dos espacios.
+
+            3. Aplica el bloque @alias para reducir claves largas (ej: 'productos[N]{i,n,p}'). Si usas alias, defínelo primero: '@alias { id:i, nombre:n }'.
+
+            4. No uses comillas a menos que un string contenga comas o caracteres ambiguos.
+
+            5. Genera SOLAMENTE el texto en formato ORYX, sin ninguna explicación, introducción o texto adicional.
+
+            Ejemplo de salida tabular:
+
+            @alias { id:i, nombre:n }
+
+            usuarios[2]{i,n,activo}:
+
+              1, Luis, true
+
+              2, Ana, false
+
+        `;
+
+
+
+        // Prompt para la Conversión Inversa (Modo 2: JSON -> ORYX)
+
+        const ORYX_SPEC_JSON = `
+
+            Eres un codificador de datos ORYX v0.1. Tu única tarea es convertir la estructura de datos JSON proporcionada a la representación de datos ORYX COMPACTA, aplicando la máxima optimización tabular y alias (@alias) para reducir el consumo de tokens.
+
+            Reglas clave de la sintaxis ORYX v0.1 para la respuesta:
+
+            1.  Identifica colecciones de objetos homogéneos y usa la sintaxis tabular (ej: 'coleccion[N]{clave1,clave2}:\n  1, valorA, valorB').
+
+            2.  Aplica el bloque @alias para cualquier clave que se repita más de dos veces en la colección.
+
+            3.  Utiliza indentación de dos espacios.
+
+            4.  Genera SOLAMENTE el texto en formato ORYX, sin ninguna explicación, introducción o texto adicional.
+
+        `;
+
+        
+
+        // ----------------------------------------------------------------------
+
+        // SIMULACIÓN DE PARSING ORYX A JSON (Para fines de validación en la UI)
+
+        // ----------------------------------------------------------------------
+
+
+
+        function simulateOryxToJson(oryxText) {
+
+            const lines = oryxText.split('\n').filter(line => line.trim() && !line.trim().startsWith('#'));
+
+            let json = {};
+
+            let currentAlias = {};
+
+            let isParsingTable = false;
+
+            let currentCollection = null;
+
+            let currentKeys = [];
+
+
+
+            try {
+
+                for (let line of lines) {
+
+                    line = line.trimStart(); // Respeta indentación para objetos simples
+
+
+
+                    // 1. Manejar Alias
+
+                    if (line.startsWith('@alias')) {
+
+                        const aliasMatch = line.match(/@alias\s*\{(.*?)\}/);
+
+                        if (aliasMatch) {
+
+                            const cleanedAlias = '{' + aliasMatch[1].replace(/(\w+):(\w+)/g, '"$1":"$2"') + '}';
+
+                            currentAlias = JSON.parse(cleanedAlias);
+
+                        }
+
+                        continue;
+
+                    }
+
+                    
+
+                    // 2. Detectar colecciones tabulares (ej: usuarios[2]{id,nombre}:)
+
+                    const collectionMatch = line.match(/^(\w+)\[\d+\]\{(.*?)\}:$/);
+
+                    if (collectionMatch) {
+
+                        currentCollection = collectionMatch[1];
+
+                        currentKeys = collectionMatch[2].split(',').map(k => k.trim());
+
+                        json[currentCollection] = [];
+
+                        isParsingTable = true;
+
+                        continue;
+
+                    }
+
+
+
+                    // 3. Parsear filas de colecciones (Indentación de 2 espacios)
+
+                    if (isParsingTable && line.startsWith('  ') && !line.includes(':')) {
+
+                        const dataLine = line.trim();
+
+                        const values = dataLine.split(',').map(v => v.trim());
+
+                        let obj = {};
+
+
+
+                        if (values.length !== currentKeys.length) throw new Error(`Mismatched columns: Expected ${currentKeys.length}, found ${values.length} in row "${dataLine}"`);
+
+
+
+                        values.forEach((val, index) => {
+
+                            const key = currentKeys[index];
+
+                            const originalKey = currentAlias[key] || key;
+
+                            let processedValue = val;
+
+
+
+                            // Simulación de inferencia de tipos (más robusta)
+
+                            if (processedValue === 'true') processedValue = true;
+
+                            else if (processedValue === 'false') processedValue = false;
+
+                            else if (processedValue.match(/^-?\d+$/)) processedValue = parseInt(processedValue);
+
+                            else if (processedValue.match(/^-?\d+\.\d+$/)) processedValue = parseFloat(processedValue);
+
+                            else if (processedValue.startsWith('"') && processedValue.endsWith('"')) processedValue = processedValue.slice(1, -1);
+
+                            
+
+                            obj[originalKey] = processedValue;
+
+                        });
+
+                        json[currentCollection].push(obj);
+
+                    } else if (isParsingTable && !line.startsWith('  ') && line.includes(':')) {
+
+                        // Un nuevo bloque comienza sin indentación, la tabla termina
+
+                         isParsingTable = false;
+
+                         currentCollection = null;
+
+                         currentKeys = [];
+
+                    }
+
+                    
+
+                    // 4. Manejar objetos simples (no anidados)
+
+                    const kvMatch = line.match(/^(\w+):\s*(.*)$/);
+
+                    if (kvMatch && !isParsingTable) {
+
+                        const key = kvMatch[1].trim();
+
+                        const val = kvMatch[2].trim();
+
+                        
+
+                        let processedValue = val;
+
+                        if (processedValue === 'true') processedValue = true;
+
+                        else if (processedValue === 'false') processedValue = false;
+
+                        else if (processedValue.match(/^-?\d+$/)) processedValue = parseInt(processedValue);
+
+                        else if (processedValue.match(/^-?\d+\.\d+$/)) processedValue = parseFloat(processedValue);
+
+                        
+
+                        // Añade al nivel superior
+
+                        json[key] = processedValue;
+
+                    }
+
+                }
+
+            } catch (e) {
+
+                console.error("Error en la simulación de parsing ORYX:", e.message);
+
+                return `{"error": "Simulación de JSON fallida: ${e.message}. Por favor, revisa la sintaxis ORYX."}`;
+
+            }
+
+
+
+            return JSON.stringify(json, null, 2);
+
+        }
+
+
+
+        // ----------------------------------------------------------------------
+
+        // Lógica principal de la aplicación (Conversión LLM)
+
+        // ----------------------------------------------------------------------
+
+
+
+        async function handleConversion(mode) {
+
+            const input = naturalInput.value.trim();
+
+            if (!input) {
+
+                jsonOutput.textContent = "Por favor, ingresa datos para comenzar la conversión.";
+
+                return;
+
+            }
+
+
+
+            // Determinar prompt y mensaje
+
+            let systemPrompt;
+
+            let userPrompt;
+
+            if (mode === 'json') {
+
+                systemPrompt = ORYX_SPEC_JSON;
+
+                userPrompt = `Convierte este JSON a ORYX v0.1: \n\n ${input}`;
+
+                buttonText.textContent = "Generando ORYX desde JSON...";
+
+            } else { // mode === 'natural'
+
+                systemPrompt = ORYX_SPEC_NATURAL;
+
+                userPrompt = `Convierte esta descripción a ORYX v0.1: ${input}`;
+
+                buttonText.textContent = "Generando ORYX desde Lenguaje Natural...";
+
+            }
+
+
+
+            // UI: Iniciar carga
+
+            convertButton.disabled = true;
+
+            reverseButton.disabled = true;
+
+            spinner.classList.remove('hidden');
+
+            oryxOutput.textContent = "";
+
+            jsonOutput.textContent = "";
+
+            tokenSavings.classList.add('hidden');
+
+            oryxOutput.classList.remove('error-border');
+
+            downloadOryx.disabled = true;
+
+            downloadJson.disabled = true;
+
+
+
+            // 1. Llamada a la API de Gemini con reintentos
+
+            let resultText = "Error al generar el formato ORYX.";
+
+            let attempt = 0;
+
+            const maxAttempts = 3;
+
+
+
+            while (attempt < maxAttempts) {
+
+                try {
+
+                    const payload = {
+
+                        contents: [{ parts: [{ text: userPrompt }] }],
+
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+
+                    };
+
+
+
+                    const response = await fetch(apiUrl, {
+
+                        method: 'POST',
+
+                        headers: { 'Content-Type': 'application/json' },
+
+                        body: JSON.stringify(payload)
+
+                    });
+
+
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+
+
+                    const result = await response.json();
+
+                    resultText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Respuesta vacía o inesperada.";
+
+                    break; 
+
+
+
+                } catch (error) {
+
+                    console.error(`Intento ${attempt + 1} fallido:`, error);
+
+                    attempt++;
+
+                    if (attempt < maxAttempts) {
+
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000)); // Espera exponencial
+
+                    }
+
+                }
+
+            }
+
+
+
+            // 2. Procesar y Resaltar ORYX
+
+            oryxOutput.textContent = resultText;
+
+            Prism.highlightElement(oryxOutput);
+
+            
+
+            // 3. Calcular tokens y validar JSON
+
+            if (!resultText.startsWith("Error")) {
+
+                const oryxTokens = countTokens(resultText); 
+
+                const jsonRepresentation = simulateOryxToJson(resultText);
+
+                jsonOutput.textContent = jsonRepresentation;
+
+                Prism.highlightElement(jsonOutput);
+
+                
+
+                // 4. Manejo de Errores de Simulación y Ahorro
+
+                if (jsonRepresentation.includes("Simulación de JSON fallida")) {
+
+                    tokenSavings.textContent = `Ahorro (Simulado): --%`;
+
+                    tokenSavings.classList.remove('bg-green-900', 'text-green-300');
+
+                    tokenSavings.classList.add('bg-red-900', 'text-red-300');
+
+                    oryxOutput.classList.add('error-border'); // Resaltar error
+
+                } else {
+
+                    const jsonTokens = countTokens(jsonRepresentation);
+
+                    const savings = Math.round(((jsonTokens - oryxTokens) / jsonTokens) * 100);
+
+                    
+
+                    tokenSavings.textContent = `Ahorro (Simulado): ${savings}%`;
+
+                    tokenSavings.classList.remove('hidden', 'bg-red-900', 'text-red-300');
+
+                    tokenSavings.classList.add('bg-green-900', 'text-green-300');
+
+
+
+                    // Habilitar descargas
+
+                    downloadOryx.disabled = false;
+
+                    downloadJson.disabled = false;
+
+                }
+
+            } else {
+
+                jsonOutput.textContent = "No se pudo validar el JSON debido al error de generación ORYX.";
+
+                Prism.highlightElement(jsonOutput);
+
+            }
+
+
+
+            // UI: Finalizar carga
+
+            convertButton.disabled = false;
+
+            reverseButton.disabled = false;
+
+            spinner.classList.add('hidden');
+
+            
+
+            // Restaurar texto del botón principal
+
+            if (mode === 'natural') {
+
+                buttonText.textContent = "🤖 Generar ORYX (Desde Lenguaje Natural)";
+
+            } else {
+
+                buttonText.textContent = "🔄 Convertir ORYX (Desde JSON Pegado)";
+
+            }
+
+        }
+
+
+
+        // ----------------------------------------------------------------------
+
+        // Función de Descarga de Archivos
+
+        // ----------------------------------------------------------------------
+
+        function downloadFile(filename, content) {
+
+            const blob = new Blob([content], { type: 'text/plain' });
+
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+
+            a.href = url;
+
+            a.download = filename;
+
+            document.body.appendChild(a);
+
+            a.click();
+
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(url);
+
+        }
+
+    </script>
+
 </body>
+
 </html>
