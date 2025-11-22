@@ -3,6 +3,15 @@
 <html lang="es">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XDNBWCQ7QP"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-XDNBWCQ7QP');
+    </script>
 
     <meta charset="UTF-8">
 
@@ -18,7 +27,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
-    
+
 
     <!-- Prism.js CSS (Tema Oscuro para Syntax Highlighting) -->
 
@@ -27,14 +36,15 @@
 
 
     <style>
-
         /* Variables y Estilos Base */
 
         :root {
 
-            --primary: #00A8E8; /* Cyan principal */
+            --primary: #00A8E8;
+            /* Cyan principal */
 
-            --accent: #00D4FF; /* Aqua brillante */
+            --accent: #00D4FF;
+            /* Aqua brillante */
 
             --dark-bg: #0F1419;
 
@@ -42,9 +52,11 @@
 
             --border: #2A3142;
 
-            --success: #10B981; /* Verde esmeralda */
+            --success: #10B981;
+            /* Verde esmeralda */
 
-            --error: #EF4444; /* Rojo fuerte */
+            --error: #EF4444;
+            /* Rojo fuerte */
 
         }
 
@@ -134,7 +146,8 @@
 
         /* Textareas y Pre (Contenedores de Código) */
 
-        textarea, pre {
+        textarea,
+        pre {
 
             background-color: #0F1419;
 
@@ -148,9 +161,11 @@
 
             overflow: auto;
 
-            margin: 0 !important; /* Anula margin de Prism */
+            margin: 0 !important;
+            /* Anula margin de Prism */
 
-            padding: 1rem !important; /* Anula padding de Prism */
+            padding: 1rem !important;
+            /* Anula padding de Prism */
 
         }
 
@@ -160,7 +175,8 @@
 
         .language-oryx {
 
-            color: #E8ECEF; /* Blanco principal */
+            color: #E8ECEF;
+            /* Blanco principal */
 
         }
 
@@ -170,7 +186,8 @@
 
         .language-oryx .token.comment {
 
-            color: var(--accent); /* Claves ORYX en aqua */
+            color: var(--accent);
+            /* Claves ORYX en aqua */
 
         }
 
@@ -178,13 +195,15 @@
 
         .language-oryx .token.number {
 
-            color: var(--primary); /* Números/Bool en cyan */
+            color: var(--primary);
+            /* Números/Bool en cyan */
 
         }
 
         .language-oryx .token.string {
 
-            color: var(--success); /* Strings en verde */
+            color: var(--success);
+            /* Strings en verde */
 
         }
 
@@ -264,7 +283,9 @@
 
         @keyframes spin {
 
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
 
         }
 
@@ -305,7 +326,6 @@
             background-color: #059669;
 
         }
-
     </style>
 
 </head>
@@ -318,9 +338,11 @@
 
         <h1 class="4xl font-extrabold mb-2 logo-text">ORYX Studio </h1>
 
-        <p class="text-xl text-gray-400">Traductor de Lenguaje Natural a <span class="text-white font-semibold">ORYX v0.1</span></p>
+        <p class="text-xl text-gray-400">Traductor de Lenguaje Natural a <span class="text-white font-semibold">ORYX
+                v0.1</span></p>
 
-        <p class="text-sm text-gray-500 mt-2">Convierte descripciones de datos en texto eficiente para ahorrar tokens de API.</p>
+        <p class="text-sm text-gray-500 mt-2">Convierte descripciones de datos en texto eficiente para ahorrar tokens de
+            API.</p>
 
     </header>
 
@@ -338,19 +360,23 @@
 
                 <p class="text-xs text-gray-400 mb-3" id="inputDescription">
 
-                    (Modo: Lenguaje Natural) Ej: "Quiero una lista de 5 productos con su id, nombre y precio. Los productos son: Laptop (1, 999.99) y Mouse (2, 25.50)."
+                    (Modo: Lenguaje Natural) Ej: "Quiero una lista de 5 productos con su id, nombre y precio. Los
+                    productos son: Laptop (1, 999.99) y Mouse (2, 25.50)."
 
                 </p>
 
                 <!-- CAMPO DE TEXTO LIMPIO -->
 
-                <textarea id="naturalInput" class="w-full p-3 rounded-lg resize-none" rows="10" placeholder="Describe aquí la estructura de datos que necesitas... o pega tu JSON aquí para la conversión inversa."></textarea>
+                <textarea id="naturalInput" class="w-full p-3 rounded-lg resize-none" rows="10"
+                    placeholder="Describe aquí la estructura de datos que necesitas... o pega tu JSON aquí para la conversión inversa."></textarea>
 
-                
+
 
                 <div class="flex flex-col gap-2 mt-3">
 
-                    <button id="convertButton" class="btn-primary w-full py-2 rounded-lg flex items-center justify-center gap-2" onclick="handleConversion('natural')">
+                    <button id="convertButton"
+                        class="btn-primary w-full py-2 rounded-lg flex items-center justify-center gap-2"
+                        onclick="handleConversion('natural')">
 
                         <span id="buttonText">🤖 Generar ORYX (Desde Lenguaje Natural)</span>
 
@@ -358,7 +384,9 @@
 
                     </button>
 
-                    <button id="reverseButton" class="btn-secondary w-full py-2 rounded-lg flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold" onclick="handleConversion('json')">
+                    <button id="reverseButton"
+                        class="btn-secondary w-full py-2 rounded-lg flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold"
+                        onclick="handleConversion('json')">
 
                         <span>🔄 Convertir ORYX (Desde JSON Pegado)</span>
 
@@ -378,7 +406,8 @@
 
                     <span>2. Formato ORYX (Token Eficiente)</span>
 
-                    <span id="tokenSavings" class="text-xs font-normal px-2 py-1 rounded-full bg-green-900 text-green-300 hidden"></span>
+                    <span id="tokenSavings"
+                        class="text-xs font-normal px-2 py-1 rounded-full bg-green-900 text-green-300 hidden"></span>
 
                 </h2>
 
@@ -388,7 +417,8 @@
 
                 <div class="flex justify-end mt-2">
 
-                    <button id="downloadOryx" class="download-btn px-4 py-1 rounded-lg text-xs" disabled onclick="downloadFile('data.oryx', oryxOutput.textContent)">
+                    <button id="downloadOryx" class="download-btn px-4 py-1 rounded-lg text-xs" disabled
+                        onclick="downloadFile('data.oryx', oryxOutput.textContent)">
 
                         📥 Descargar .oryx
 
@@ -396,7 +426,8 @@
 
                 </div>
 
-                <p class="text-xs text-gray-400 mt-2">Este formato reduce la redundancia para **maximizar el espacio de tokens** en las llamadas a la API de tu LLM.</p>
+                <p class="text-xs text-gray-400 mt-2">Este formato reduce la redundancia para **maximizar el espacio de
+                    tokens** en las llamadas a la API de tu LLM.</p>
 
             </div>
 
@@ -414,7 +445,8 @@
 
                 <div class="flex justify-end mt-2">
 
-                    <button id="downloadJson" class="download-btn download-btn-json px-4 py-1 rounded-lg text-xs" disabled onclick="downloadFile('data.json', jsonOutput.textContent)">
+                    <button id="downloadJson" class="download-btn download-btn-json px-4 py-1 rounded-lg text-xs"
+                        disabled onclick="downloadFile('data.json', jsonOutput.textContent)">
 
                         📥 Descargar .json
 
@@ -422,7 +454,8 @@
 
                 </div>
 
-                <p class="text-xs text-gray-400 mt-2">ORYX garantiza el **Mapeo 1:1** con JSON, asegurando que la estructura de datos sea correcta y universalmente compatible.</p>
+                <p class="text-xs text-gray-400 mt-2">ORYX garantiza el **Mapeo 1:1** con JSON, asegurando que la
+                    estructura de datos sea correcta y universalmente compatible.</p>
 
             </div>
 
@@ -434,9 +467,11 @@
 
     <footer class="mt-8 text-center text-sm text-gray-500 border-t border-gray-800 pt-4">
 
-        <p>ORYX Studio basado en la Especificación v0.1 (Licencia MIT) | Creado para el ahorro de tokens y la eficiencia. <br>
+        <p>ORYX Studio basado en la Especificación v0.1 (Licencia MIT) | Creado para el ahorro de tokens y la
+            eficiencia. <br>
 
-        *Nota: La tokenización es simulada por motivos de entorno (sin acceso a librerías de terceros como tiktoken).</p>
+            *Nota: La tokenización es simulada por motivos de entorno (sin acceso a librerías de terceros como
+            tiktoken).</p>
 
     </footer>
 
@@ -504,7 +539,7 @@
 
 
 
-        const apiKey = ""; 
+        const apiKey = "";
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
@@ -606,7 +641,7 @@
 
         `;
 
-        
+
 
         // ----------------------------------------------------------------------
 
@@ -658,7 +693,7 @@
 
                     }
 
-                    
+
 
                     // 2. Detectar colecciones tabulares (ej: usuarios[2]{id,nombre}:)
 
@@ -718,7 +753,7 @@
 
                             else if (processedValue.startsWith('"') && processedValue.endsWith('"')) processedValue = processedValue.slice(1, -1);
 
-                            
+
 
                             obj[originalKey] = processedValue;
 
@@ -730,15 +765,15 @@
 
                         // Un nuevo bloque comienza sin indentación, la tabla termina
 
-                         isParsingTable = false;
+                        isParsingTable = false;
 
-                         currentCollection = null;
+                        currentCollection = null;
 
-                         currentKeys = [];
+                        currentKeys = [];
 
                     }
 
-                    
+
 
                     // 4. Manejar objetos simples (no anidados)
 
@@ -750,7 +785,7 @@
 
                         const val = kvMatch[2].trim();
 
-                        
+
 
                         let processedValue = val;
 
@@ -762,7 +797,7 @@
 
                         else if (processedValue.match(/^-?\d+\.\d+$/)) processedValue = parseFloat(processedValue);
 
-                        
+
 
                         // Añade al nivel superior
 
@@ -902,7 +937,7 @@
 
                     resultText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Respuesta vacía o inesperada.";
 
-                    break; 
+                    break;
 
 
 
@@ -930,13 +965,13 @@
 
             Prism.highlightElement(oryxOutput);
 
-            
+
 
             // 3. Calcular tokens y validar JSON
 
             if (!resultText.startsWith("Error")) {
 
-                const oryxTokens = countTokens(resultText); 
+                const oryxTokens = countTokens(resultText);
 
                 const jsonRepresentation = simulateOryxToJson(resultText);
 
@@ -944,7 +979,7 @@
 
                 Prism.highlightElement(jsonOutput);
 
-                
+
 
                 // 4. Manejo de Errores de Simulación y Ahorro
 
@@ -964,7 +999,7 @@
 
                     const savings = Math.round(((jsonTokens - oryxTokens) / jsonTokens) * 100);
 
-                    
+
 
                     tokenSavings.textContent = `Ahorro (Simulado): ${savings}%`;
 
@@ -1000,7 +1035,7 @@
 
             spinner.classList.add('hidden');
 
-            
+
 
             // Restaurar texto del botón principal
 
