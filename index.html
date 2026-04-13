@@ -1,490 +1,343 @@
 <!DOCTYPE html>
-
-<html lang="es">
-
+<html class="dark" lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XDNBWCQ7QP"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XDNBWCQ7QP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XDNBWCQ7QP');
+  </script>
+
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>ORYX Studio — Token-Efficient Format Playground</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css" rel="stylesheet"/>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-low":     "#131314",
+            "surface-container":         "#1a191b",
+            "surface-bright":            "#2c2c2d",
+            "surface-dim":               "#0e0e0f",
+            "secondary":                 "#47ffb8",
+            "primary":                   "#e6fd45",
+            "on-primary":                "#556000",
+            "primary-container":         "#b9cf06",
+            "primary-dim":               "#d8ee36",
+            "secondary-dim":             "#2ff0ab",
+            "on-surface-variant":        "#adaaab",
+            "on-surface":                "#ffffff",
+            "on-background":             "#ffffff",
+            "surface":                   "#0e0e0f",
+            "background":                "#0e0e0f",
+            "surface-container-highest": "#262627",
+            "surface-container-high":    "#201f21",
+            "surface-container-lowest":  "#000000",
+            "surface-variant":           "#262627",
+            "outline-variant":           "#484849",
+            "outline":                   "#767576",
+            "error":                     "#ff7351",
+            "error-dim":                 "#d53d18",
+            "tertiary":                  "#ffe48f",
+            "tertiary-dim":              "#eec52c",
+            "surface-tint":              "#e6fd45",
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.25rem",
+            xl: "0.5rem",
+            full: "0.75rem",
+          },
+          fontFamily: {
+            headline: ["Space Grotesk"],
+            body: ["Inter"],
+            label: ["Inter"],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-headline { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono, pre, code, textarea { font-family: 'JetBrains Mono', 'Fira Code', monospace !important; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+    .data-pulse { position: relative; }
+    .data-pulse::after {
+      content: '';
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #47ffb8;
+      opacity: 0.5;
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(.33); }
+      80%, 100% { opacity: 0; }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin 0.8s linear infinite; }
+
+    /* Prism overrides */
+    pre[class*="language-"], code[class*="language-"] {
+      background: transparent !important;
+      font-size: 0.8rem;
+      line-height: 1.7;
+    }
+    .token.property, .token.key    { color: #47ffb8; }
+    .token.number                  { color: #f9a8d4; }
+    .token.boolean                 { color: #86efac; }
+    .token.string                  { color: #fde68a; }
+    .token.comment                 { color: #484849; font-style: italic; }
+    .token.punctuation             { color: #666672; }
 
-        gtag('config', 'G-XDNBWCQ7QP');
-    </script>
+    #oryxOutput, #jsonOutput { white-space: pre-wrap; word-break: break-word; min-height: 80px; display: block; }
 
-    <meta charset="UTF-8">
+    .tab-active   { background: #201f21; color: #e6fd45; }
+    .tab-inactive { color: rgba(173,170,171,0.5); }
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #484849; border-radius: 2px; }
 
-    <title>ORYX Studio - Conversor de Lenguaje Natural a ORYX</title>
-
-    <!-- Tailwind CSS CDN -->
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Incluir fuente Inter -->
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-
-
-
-    <!-- Prism.js CSS (Tema Oscuro para Syntax Highlighting) -->
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css" rel="stylesheet" />
-
-
-
-    <style>
-        /* Variables y Estilos Base */
-
-        :root {
-
-            --primary: #00A8E8;
-            /* Cyan principal */
-
-            --accent: #00D4FF;
-            /* Aqua brillante */
-
-            --dark-bg: #0F1419;
-
-            --card-bg: #1A1F2E;
-
-            --border: #2A3142;
-
-            --success: #10B981;
-            /* Verde esmeralda */
-
-            --error: #EF4444;
-            /* Rojo fuerte */
-
-        }
-
-
-
-        body {
-
-            font-family: 'Inter', sans-serif;
-
-            background-color: var(--dark-bg);
-
-            color: #E8ECEF;
-
-            min-height: 100vh;
-
-            display: flex;
-
-            flex-direction: column;
-
-        }
-
-
-
-        /* Estilos específicos del Header/Logo */
-
-        .logo-text {
-
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-
-            -webkit-background-clip: text;
-
-            -webkit-text-fill-color: transparent;
-
-            background-clip: text;
-
-        }
-
-
-
-        /* Estilos del área de trabajo */
-
-        .workspace {
-
-            display: grid;
-
-            grid-template-columns: 1fr;
-
-            gap: 1.5rem;
-
-        }
-
-
-
-        @media (min-width: 1024px) {
-
-            .workspace {
-
-                grid-template-columns: repeat(3, 1fr);
-
-            }
-
-        }
-
-
-
-        /* Estilos del Panel de Código */
-
-        .code-panel {
-
-            background-color: var(--card-bg);
-
-            border: 1px solid var(--border);
-
-            transition: all 0.3s ease;
-
-        }
-
-
-
-        .code-panel:hover {
-
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
-
-        }
-
-
-
-        /* Textareas y Pre (Contenedores de Código) */
-
-        textarea,
-        pre {
-
-            background-color: #0F1419;
-
-            border: 1px solid #2A3142;
-
-            font-family: 'Courier New', monospace;
-
-            font-size: 0.875rem;
-
-            min-height: 250px;
-
-            overflow: auto;
-
-            margin: 0 !important;
-            /* Anula margin de Prism */
-
-            padding: 1rem !important;
-            /* Anula padding de Prism */
-
-        }
-
-
-
-        /* Resaltado de Sintaxis para ORYX */
-
-        .language-oryx {
-
-            color: #E8ECEF;
-            /* Blanco principal */
-
-        }
-
-        .language-oryx .token.property,
-
-        .language-oryx .token.selector,
-
-        .language-oryx .token.comment {
-
-            color: var(--accent);
-            /* Claves ORYX en aqua */
-
-        }
-
-        .language-oryx .token.boolean,
-
-        .language-oryx .token.number {
-
-            color: var(--primary);
-            /* Números/Bool en cyan */
-
-        }
-
-        .language-oryx .token.string {
-
-            color: var(--success);
-            /* Strings en verde */
-
-        }
-
-
-
-        /* Resaltado de Sintaxis para JSON (Prism default es bueno, pero lo ajustamos) */
-
-        #jsonOutput.language-json {
-
-            color: #E8ECEF;
-
-        }
-
-
-
-        /* Color de error para el borde del ORYX */
-
-        .error-border {
-
-            border: 2px solid var(--error) !important;
-
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
-
-        }
-
-
-
-        /* Estilos del botón de acción */
-
-        .btn-primary {
-
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-
-            color: var(--dark-bg);
-
-            font-weight: 700;
-
-            transition: all 0.3s ease;
-
-            box-shadow: 0 5px 15px rgba(0, 168, 232, 0.3);
-
-        }
-
-
-
-        .btn-primary:hover {
-
-            opacity: 0.9;
-
-            transform: translateY(-2px);
-
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.5);
-
-        }
-
-
-
-        /* Indicador de carga */
-
-        .spinner {
-
-            border: 4px solid rgba(255, 255, 255, 0.1);
-
-            border-left-color: var(--accent);
-
-            border-radius: 50%;
-
-            width: 1.5rem;
-
-            height: 1.5rem;
-
-            animation: spin 1s linear infinite;
-
-        }
-
-
-
-        @keyframes spin {
-
-            to {
-                transform: rotate(360deg);
-            }
-
-        }
-
-
-
-        /* Estilo para los botones de descarga */
-
-        .download-btn {
-
-            background-color: var(--border);
-
-            color: #E8ECEF;
-
-            transition: background-color 0.2s;
-
-        }
-
-
-
-        .download-btn:hover {
-
-            background-color: var(--primary-dark);
-
-        }
-
-
-
-        .download-btn-json {
-
-            background-color: var(--success);
-
-            color: var(--dark-bg);
-
-        }
-
-        .download-btn-json:hover {
-
-            background-color: #059669;
-
-        }
-    </style>
-
+    .error-border { border-color: rgba(255,115,81,0.5) !important; }
+  </style>
 </head>
 
-<body class="p-4 md:p-8">
+<body class="bg-background text-on-surface min-h-screen flex flex-col overflow-hidden">
 
+<!-- NAV -->
+<header class="bg-[#0e0e0f] flex justify-between items-center w-full px-6 h-14 fixed top-0 z-[100] border-b border-outline-variant/15">
+  <div class="flex items-center gap-8">
+    <span class="font-mono font-bold tracking-tighter text-[#e8ff47] uppercase text-lg">ORYX</span>
+    <nav class="hidden md:flex space-x-6 text-[12px] font-medium tracking-wide">
+      <a class="text-[#adaaab] hover:text-[#e8ff47] transition-colors" href="https://github.com/devlewiso/oryx-parser#readme" target="_blank">Docs</a>
+      <a class="text-[#adaaab] hover:text-[#e8ff47] transition-colors" href="https://www.npmjs.com/package/oryx-parser" target="_blank">npm</a>
+    </nav>
+  </div>
+  <div class="flex items-center space-x-3">
+    <span class="text-[10px] font-mono text-[#adaaab] bg-surface-container px-2 py-1 rounded">v0.3.0</span>
+    <a href="https://github.com/devlewiso/oryx-parser" target="_blank"
+       class="text-[#e8ff47] hover:text-white transition-colors text-[12px] font-medium flex items-center gap-1">
+      <span class="material-symbols-outlined text-base">open_in_new</span> GitHub
+    </a>
+  </div>
+</header>
 
+<div class="flex flex-1 pt-14 pb-10">
 
-    <header class="text-center mb-8">
+  <!-- SIDEBAR -->
+  <aside class="bg-[#131314] flex flex-col items-center py-4 space-y-8 w-16 fixed left-0 bottom-10 top-14 border-r border-outline-variant/15">
+    <div class="flex flex-col items-center gap-5">
+      <div class="flex flex-col items-center gap-1 cursor-pointer">
+        <div class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#201f21] text-[#e8ff47] border-r-2 border-[#e8ff47]">
+          <span class="material-symbols-outlined text-lg">terminal</span>
+        </div>
+        <span class="text-[9px] uppercase tracking-widest text-[#e8ff47] font-mono">Input</span>
+      </div>
+      <div class="flex flex-col items-center gap-1 cursor-pointer group">
+        <div class="w-9 h-9 flex items-center justify-center rounded-lg text-[#484849] group-hover:bg-[#201f21] group-hover:text-[#e8ff47] transition-all">
+          <span class="material-symbols-outlined text-lg">code</span>
+        </div>
+        <span class="text-[9px] uppercase tracking-widest text-[#484849] font-mono group-hover:text-[#e8ff47]">Output</span>
+      </div>
+      <div class="flex flex-col items-center gap-1 cursor-pointer group">
+        <div class="w-9 h-9 flex items-center justify-center rounded-lg text-[#484849] group-hover:bg-[#201f21] group-hover:text-[#e8ff47] transition-all">
+          <span class="material-symbols-outlined text-lg">schema</span>
+        </div>
+        <span class="text-[9px] uppercase tracking-widest text-[#484849] font-mono group-hover:text-[#e8ff47]">Schema</span>
+      </div>
+    </div>
+  </aside>
 
-        <h1 class="4xl font-extrabold mb-2 logo-text">ORYX Studio </h1>
+  <!-- MAIN WORKSPACE -->
+  <main class="ml-16 flex-1 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-0 overflow-hidden" style="height: calc(100vh - 56px - 40px);">
 
-        <p class="text-xl text-gray-400">Traductor de Lenguaje Natural a <span class="text-white font-semibold">ORYX
-                v0.1</span></p>
+    <!-- LEFT: INPUT -->
+    <section class="flex flex-col h-full bg-surface-dim border-r border-outline-variant/15 overflow-y-auto">
 
-        <p class="text-sm text-gray-500 mt-2">Convierte descripciones de datos en texto eficiente para ahorrar tokens de
-            API.</p>
+      <!-- Hero -->
+      <div class="p-8 border-b border-outline-variant/10">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-highest/50 rounded-full border border-primary/20 text-[11px] font-mono text-primary uppercase tracking-tighter">
+            <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+            ~42% fewer tokens than JSON
+          </span>
+        </div>
+        <h1 class="text-4xl font-headline font-bold tracking-tight text-white mb-3">
+          Write ORYX. See results <span class="text-primary italic">instantly.</span>
+        </h1>
+        <p class="text-on-surface-variant max-w-xl text-base font-light leading-relaxed">
+          Token-efficient format for LLMs. Parse, encode, and validate directly in the browser —
+          powered by <span class="text-primary font-mono">oryx-parser</span>.
+        </p>
+      </div>
 
-    </header>
+      <!-- Input Workspace -->
+      <div class="flex flex-col flex-1 p-6 space-y-4">
 
-
-
-    <main class="flex-grow">
-
-        <div class="workspace">
-
-            <!-- Panel 1: Entrada de Lenguaje Natural / JSON -->
-
-            <div class="code-panel p-4 rounded-xl">
-
-                <h2 class="text-lg font-bold mb-3 text-white">1. Describe tus Datos</h2>
-
-                <p class="text-xs text-gray-400 mb-3" id="inputDescription">
-
-                    (Modo: Lenguaje Natural) Ej: "Quiero una lista de 5 productos con su id, nombre y precio. Los
-                    productos son: Laptop (1, 999.99) y Mouse (2, 25.50)."
-
-                </p>
-
-                <!-- CAMPO DE TEXTO LIMPIO -->
-
-                <textarea id="naturalInput" class="w-full p-3 rounded-lg resize-none" rows="10"
-                    placeholder="Describe aquí la estructura de datos que necesitas... o pega tu JSON aquí para la conversión inversa."></textarea>
-
-
-
-                <div class="flex flex-col gap-2 mt-3">
-
-                    <button id="convertButton"
-                        class="btn-primary w-full py-2 rounded-lg flex items-center justify-center gap-2"
-                        onclick="handleConversion('natural')">
-
-                        <span id="buttonText">🤖 Generar ORYX (Desde Lenguaje Natural)</span>
-
-                        <div id="spinner" class="spinner hidden"></div>
-
-                    </button>
-
-                    <button id="reverseButton"
-                        class="btn-secondary w-full py-2 rounded-lg flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold"
-                        onclick="handleConversion('json')">
-
-                        <span>🔄 Convertir ORYX (Desde JSON Pegado)</span>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- Panel 2: Salida ORYX (Compresión y Ahorro) -->
-
-            <div class="code-panel p-4 rounded-xl relative">
-
-                <h2 class="text-lg font-bold mb-3 text-white flex justify-between items-center">
-
-                    <span>2. Formato ORYX (Token Eficiente)</span>
-
-                    <span id="tokenSavings"
-                        class="text-xs font-normal px-2 py-1 rounded-full bg-green-900 text-green-300 hidden"></span>
-
-                </h2>
-
-                <!-- CAMPOS DE SALIDA VACÍOS -->
-
-                <pre id="oryxOutput" class="w-full p-3 rounded-lg whitespace-pre-wrap language-oryx"></pre>
-
-                <div class="flex justify-end mt-2">
-
-                    <button id="downloadOryx" class="download-btn px-4 py-1 rounded-lg text-xs" disabled
-                        onclick="downloadFile('data.oryx', oryxOutput.textContent)">
-
-                        📥 Descargar .oryx
-
-                    </button>
-
-                </div>
-
-                <p class="text-xs text-gray-400 mt-2">Este formato reduce la redundancia para **maximizar el espacio de
-                    tokens** en las llamadas a la API de tu LLM.</p>
-
-            </div>
-
-
-
-            <!-- Panel 3: Salida JSON (Validación y Mapeo) -->
-
-            <div class="code-panel p-4 rounded-xl relative">
-
-                <h2 class="text-lg font-bold mb-3 text-white">3. Estructura JSON (Validación)</h2>
-
-                <!-- CAMPOS DE SALIDA VACÍOS -->
-
-                <pre id="jsonOutput" class="w-full p-3 rounded-lg whitespace-pre-wrap language-json"></pre>
-
-                <div class="flex justify-end mt-2">
-
-                    <button id="downloadJson" class="download-btn download-btn-json px-4 py-1 rounded-lg text-xs"
-                        disabled onclick="downloadFile('data.json', jsonOutput.textContent)">
-
-                        📥 Descargar .json
-
-                    </button>
-
-                </div>
-
-                <p class="text-xs text-gray-400 mt-2">ORYX garantiza el **Mapeo 1:1** con JSON, asegurando que la
-                    estructura de datos sea correcta y universalmente compatible.</p>
-
-            </div>
-
+        <!-- Mode Tabs -->
+        <div class="flex bg-surface-container-low p-1 rounded-lg w-fit gap-1">
+          <button id="tabNatural"
+            class="px-4 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded tab-inactive transition-all"
+            onclick="setTab('natural')">
+            Natural Language
+          </button>
+          <button id="tabJson"
+            class="px-4 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded tab-active transition-all"
+            onclick="setTab('json')">
+            JSON → ORYX
+          </button>
         </div>
 
-    </main>
+        <!-- Textarea -->
+        <div class="flex-1 flex flex-col bg-surface-container-lowest rounded-lg border border-outline-variant/15 overflow-hidden focus-within:border-primary/30 transition-colors">
+          <div class="flex justify-between items-center px-4 py-2 border-b border-outline-variant/10 bg-surface-container-low/50">
+            <span id="inputLabel" class="text-[10px] font-mono text-outline uppercase tracking-widest">input.json</span>
+            <span class="material-symbols-outlined text-outline text-sm">unfold_more</span>
+          </div>
+          <textarea
+            id="naturalInput"
+            class="flex-1 bg-transparent p-6 text-sm text-secondary-dim focus:outline-none resize-none leading-relaxed min-h-[220px]"
+            spellcheck="false"
+            placeholder="Paste JSON here to convert to ORYX..."
+          >{
+  "project": "OryxParser",
+  "version": "0.3.0",
+  "features": ["compression", "validation", "streaming"],
+  "active": true,
+  "stats": {
+    "latency_ms": 12,
+    "efficiency_ratio": 0.649
+  }
+}</textarea>
 
+          <!-- Buttons -->
+          <div class="p-4 bg-surface-container-low/30 flex items-center gap-3 flex-wrap">
+            <button id="convertButton"
+              onclick="handleConversion(window.currentMode)"
+              class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-2.5 rounded text-sm font-bold flex items-center gap-2 hover:scale-[0.98] transition-transform active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg id="spinner" class="spinner hidden w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span class="material-symbols-outlined text-[18px]" id="btnIcon">auto_awesome</span>
+              <span id="buttonText">Convert JSON → ORYX</span>
+            </button>
+            <button id="reverseButton"
+              onclick="handleConversion('natural')"
+              class="px-5 py-2.5 rounded text-sm font-medium border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors disabled:opacity-50 disabled:cursor-not-allowed hidden">
+              Generate from Natural Language
+            </button>
+          </div>
+        </div>
 
+      </div>
+    </section>
 
-    <footer class="mt-8 text-center text-sm text-gray-500 border-t border-gray-800 pt-4">
+    <!-- RIGHT: OUTPUT -->
+    <section class="flex flex-col h-full bg-surface overflow-y-auto">
 
-        <p>ORYX Studio basado en la Especificación v0.1 (Licencia MIT) | Creado para el ahorro de tokens y la
-            eficiencia. <br>
+      <!-- Empty state -->
+      <div id="emptyState" class="flex flex-col items-center justify-center flex-1 p-10 text-center">
+        <div class="w-16 h-16 rounded-xl bg-surface-container-low flex items-center justify-center mb-4 border border-outline-variant/10">
+          <span class="material-symbols-outlined text-3xl text-outline">bolt</span>
+        </div>
+        <p class="text-[13px] text-on-surface-variant font-mono">
+          Paste data and hit <span class="text-primary">Convert</span><br/>to see ORYX output here
+        </p>
+      </div>
 
-            *Nota: La tokenización es simulada por motivos de entorno (sin acceso a librerías de terceros como
-            tiktoken).</p>
+      <!-- Results (hidden until first conversion) -->
+      <div id="resultsArea" class="hidden flex-col">
 
-    </footer>
+        <!-- ORYX Output -->
+        <div class="p-6 border-b border-outline-variant/10">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-[11px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">ORYX Output</h3>
+            <div class="flex items-center gap-3">
+              <span id="oryxTokenBadge" class="bg-secondary/10 text-secondary text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-secondary/20"></span>
+              <button onclick="copyToClipboard('oryxOutput')" title="Copy" class="material-symbols-outlined text-outline hover:text-white transition-colors text-[18px]">content_copy</button>
+            </div>
+          </div>
+          <div id="oryxPanel" class="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/10">
+            <code id="oryxOutput" class="language-oryx text-[13px] leading-loose"></code>
+          </div>
+        </div>
 
+        <!-- Efficiency Bar -->
+        <div id="tokenSavings" class="p-6 border-b border-outline-variant/10">
+          <div class="flex justify-between items-end mb-2">
+            <h3 class="text-[11px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">Efficiency Gain</h3>
+            <span id="savingsPct" class="text-2xl font-headline font-bold text-primary tracking-tighter">—</span>
+          </div>
+          <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+            <div id="savingsBar" class="h-full bg-primary shadow-[0_0_15px_rgba(230,253,69,0.3)] transition-all duration-700" style="width:0%"></div>
+          </div>
+          <div class="mt-2 flex justify-between font-mono text-[10px] text-outline">
+            <span id="oryxTokenCount"></span>
+            <span id="jsonTokenCount"></span>
+          </div>
+        </div>
 
+        <!-- JSON Equivalent -->
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-[11px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">JSON Equivalent</h3>
+            <div class="flex items-center gap-3">
+              <span id="jsonTokenBadge" class="bg-error/10 text-error text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-error/20"></span>
+              <button onclick="copyToClipboard('jsonOutput')" title="Copy" class="material-symbols-outlined text-outline hover:text-white transition-colors text-[18px]">content_copy</button>
+            </div>
+          </div>
+          <div id="jsonPanel" class="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/5">
+            <code id="jsonOutput" class="language-json text-[12px] text-outline/80"></code>
+          </div>
+        </div>
 
-    <!-- Prism.js JS -->
+      </div>
+    </section>
+  </main>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<!-- FOOTER -->
+<footer class="bg-[#000000] border-t border-[#484849]/15 fixed bottom-0 w-full flex justify-between items-center px-6 h-10 z-[110] font-mono text-[10px] uppercase">
+  <div class="flex items-center gap-4">
+    <span class="text-[#e8ff47]">oryx-parser v0.3.0 — MIT</span>
+    <div class="flex items-center gap-2 ml-4">
+      <span class="data-pulse w-2 h-2 rounded-full bg-secondary"></span>
+      <span id="engineStatus" class="text-secondary/80 lowercase normal-case">Engine ready</span>
+    </div>
+  </div>
+  <div class="flex space-x-6">
+    <button id="downloadOryx" disabled
+      class="text-[#adaaab] hover:text-white transition-opacity opacity-80 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed">
+      Download .oryx
+    </button>
+    <button id="downloadJson" disabled
+      class="text-[#adaaab] hover:text-white transition-opacity opacity-80 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed">
+      Download .json
+    </button>
+  </div>
+</footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<!-- Prism.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 
-    <script type="module" src="/src/main.js"></script>
+<!-- App module -->
+<script type="module" src="/src/main.js"></script>
 
 </body>
-
 </html>

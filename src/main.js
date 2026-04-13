@@ -1,191 +1,238 @@
 import { parse, encode, validate } from 'oryx-parser';
 
-// Prism language definition for ORYX syntax highlighting
+// Prism language definition for ORYX
 Prism.languages.oryx = {
   'comment':           { pattern: /(^|[^\\:])#.*/, lookbehind: true, greedy: true },
-  'directive':         { pattern: /@alias|@block/, alias: 'comment' },
-  'collection-header': { pattern: /(\w+)\[\d+\]\{.*?\}:/, alias: 'selector' },
-  'key':               { pattern: /[\w\s-]+(?=\s*:)/, alias: 'property' },
-  'boolean':           /\b(?:true|false)\b/,
-  'number':            /\b\d+(\.\d+)?\b/,
+  'directive':         { pattern: /@alias|@block/, alias: 'keyword' },
+  'collection-header': { pattern: /\w+\[\d*\]\{.*?\}:/, alias: 'selector' },
+  'key':               { pattern: /[\w-]+(?=\s*:)/, alias: 'property' },
+  'boolean':           /\b(?:true|false|null)\b/,
+  'number':            /\b-?\d+(\.\d+)?\b/,
   'string':            { pattern: /"(?:\\.|[^"\\])*"/, greedy: true },
 };
 
+// Gemini API (for Natural Language → ORYX mode)
 const apiKey = "";
 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-// UI elements
-const naturalInput   = document.getElementById('naturalInput');
-const oryxOutput     = document.getElementById('oryxOutput');
-const jsonOutput     = document.getElementById('jsonOutput');
-const convertButton  = document.getElementById('convertButton');
-const reverseButton  = document.getElementById('reverseButton');
-const buttonText     = document.getElementById('buttonText');
-const spinner        = document.getElementById('spinner');
-const tokenSavings   = document.getElementById('tokenSavings');
-const downloadOryx   = document.getElementById('downloadOryx');
-const downloadJson   = document.getElementById('downloadJson');
+const ORYX_SPEC_NATURAL = `
+Eres un codificador de datos ORYX v0.3. Tu única tarea es convertir la descripción en lenguaje natural a formato ORYX COMPACTO.
+
+Reglas:
+1. Usa sintaxis tabular para listas: coleccion[N]{clave1,clave2}:\n  val1, val2
+2. Indentación de dos espacios.
+3. Usa @alias para claves largas: @alias { firstName: fn }
+4. Sin comillas a menos que el string contenga comas.
+5. Devuelve SOLO el texto ORYX, sin explicaciones.
+`;
+
+// UI refs
+const naturalInput  = document.getElementById('naturalInput');
+const oryxOutput    = document.getElementById('oryxOutput');
+const jsonOutput    = document.getElementById('jsonOutput');
+const convertButton = document.getElementById('convertButton');
+const reverseButton = document.getElementById('reverseButton');
+const buttonText    = document.getElementById('buttonText');
+const btnIcon       = document.getElementById('btnIcon');
+const spinner       = document.getElementById('spinner');
+const downloadOryx  = document.getElementById('downloadOryx');
+const downloadJson  = document.getElementById('downloadJson');
+const emptyState    = document.getElementById('emptyState');
+const resultsArea   = document.getElementById('resultsArea');
+const engineStatus  = document.getElementById('engineStatus');
+const savingsPct    = document.getElementById('savingsPct');
+const savingsBar    = document.getElementById('savingsBar');
+const oryxTokenBadge = document.getElementById('oryxTokenBadge');
+const jsonTokenBadge = document.getElementById('jsonTokenBadge');
+const oryxTokenCount = document.getElementById('oryxTokenCount');
+const jsonTokenCount = document.getElementById('jsonTokenCount');
+const inputLabel    = document.getElementById('inputLabel');
+const oryxPanel     = document.getElementById('oryxPanel');
+
+// Current mode: 'json' | 'natural'
+window.currentMode = 'json';
+
+// Tab switcher
+window.setTab = function(mode) {
+  window.currentMode = mode;
+  const tabNatural = document.getElementById('tabNatural');
+  const tabJson    = document.getElementById('tabJson');
+
+  if (mode === 'natural') {
+    tabNatural.className = tabNatural.className.replace('tab-inactive', 'tab-active');
+    tabJson.className    = tabJson.className.replace('tab-active', 'tab-inactive');
+    inputLabel.textContent = 'natural language';
+    naturalInput.placeholder = 'Describe your data in plain language...\ne.g. "A list of 3 products with id, name, price and stock"';
+    buttonText.textContent = 'Generate ORYX';
+    btnIcon.textContent = 'smart_toy';
+    reverseButton.classList.remove('hidden');
+  } else {
+    tabJson.className    = tabJson.className.replace('tab-inactive', 'tab-active');
+    tabNatural.className = tabNatural.className.replace('tab-active', 'tab-inactive');
+    inputLabel.textContent = 'input.json';
+    naturalInput.placeholder = 'Paste JSON here to convert to ORYX...';
+    buttonText.textContent = 'Convert JSON → ORYX';
+    btnIcon.textContent = 'auto_awesome';
+    reverseButton.classList.add('hidden');
+  }
+};
 
 function countTokens(text) {
   if (!text) return 0;
   return text.match(/[^\s,;:{}\[\]"']+|[,;:{}\[\]"']/g)?.length || 0;
 }
 
-const ORYX_SPEC_NATURAL = `
-  Eres un codificador de datos ORYX v0.1. Tu única tarea es convertir la descripción de datos en lenguaje natural a la representación de datos ORYX COMPACTA, utilizando la sintaxis exacta.
-
-  Reglas clave de la sintaxis ORYX v0.1 para la respuesta:
-  1. Prioriza la sintaxis tabular (ej: 'coleccion[N]{clave1,clave2}:\n  1, valorA, valorB') para listas de objetos.
-  2. Utiliza indentación de dos espacios.
-  3. Aplica el bloque @alias para reducir claves largas (ej: 'productos[N]{i,n,p}'). Si usas alias, defínelo primero: '@alias { id:i, nombre:n }'.
-  4. No uses comillas a menos que un string contenga comas o caracteres ambiguos.
-  5. Genera SOLAMENTE el texto en formato ORYX, sin ninguna explicación, introducción o texto adicional.
-
-  Ejemplo de salida tabular:
-  @alias { id:i, nombre:n }
-  usuarios[2]{i,n,activo}:
-    1, Luis, true
-    2, Ana, false
-`;
-
 function oryxToJson(oryxText) {
-  const result = validate(oryxText);
-  if (!result.valid) {
-    return `{"error": "ORYX inválido: ${result.error}"}`;
-  }
+  const v = validate(oryxText);
+  if (!v.valid) return `// Parse error: ${v.error}`;
   const parsed = parse(oryxText);
-  if (parsed === null) {
-    return `{"error": "No se pudo parsear el ORYX."}`;
-  }
+  if (parsed === null) return '// Could not parse ORYX.';
   return JSON.stringify(parsed, null, 2);
 }
 
 function jsonToOryx(jsonText) {
-  let obj;
   try {
-    obj = JSON.parse(jsonText);
-  } catch {
-    return { error: 'JSON inválido. Verifica la sintaxis.' };
-  }
-  try {
+    const obj = JSON.parse(jsonText);
     return { result: encode(obj, { aliases: true }) };
   } catch (e) {
-    return { error: `Error al codificar: ${e.message}` };
+    return { error: e.message };
   }
 }
 
-async function callGemini(systemPrompt, userPrompt) {
+async function callGemini(userPrompt) {
   const payload = {
     contents: [{ parts: [{ text: userPrompt }] }],
-    systemInstruction: { parts: [{ text: systemPrompt }] },
+    systemInstruction: { parts: [{ text: ORYX_SPEC_NATURAL }] },
   };
-
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let i = 0; i < 3; i++) {
     try {
-      const response = await fetch(apiUrl, {
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const result = await response.json();
-      return result.candidates?.[0]?.content?.parts?.[0]?.text || 'Error: Respuesta vacía.';
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Error: empty response.';
     } catch (err) {
-      console.error(`Intento ${attempt + 1} fallido:`, err);
-      if (attempt < 2) await new Promise(r => setTimeout(r, Math.pow(2, attempt + 1) * 1000));
+      if (i < 2) await new Promise(r => setTimeout(r, Math.pow(2, i + 1) * 1000));
     }
   }
-  return 'Error al generar el formato ORYX.';
+  return 'Error: could not reach Gemini API.';
 }
 
 function showLoading(label) {
   convertButton.disabled = true;
-  reverseButton.disabled = true;
+  if (reverseButton) reverseButton.disabled = true;
   spinner.classList.remove('hidden');
+  btnIcon.classList.add('hidden');
   buttonText.textContent = label;
-  oryxOutput.textContent = '';
-  jsonOutput.textContent = '';
-  tokenSavings.classList.add('hidden');
-  oryxOutput.classList.remove('error-border');
+  engineStatus.textContent = 'Processing…';
   downloadOryx.disabled = true;
   downloadJson.disabled = true;
 }
 
-function stopLoading(naturalLabel) {
+function stopLoading() {
   convertButton.disabled = false;
-  reverseButton.disabled = false;
+  if (reverseButton) reverseButton.disabled = false;
   spinner.classList.add('hidden');
-  buttonText.textContent = naturalLabel;
+  btnIcon.classList.remove('hidden');
+  engineStatus.textContent = 'Engine ready';
 }
 
-function displayResults(oryxText, jsonText) {
+function showResults(oryxText, jsonText) {
+  // Show results area
+  emptyState.classList.add('hidden');
+  resultsArea.classList.remove('hidden');
+  resultsArea.classList.add('flex');
+
+  // ORYX output
   oryxOutput.textContent = oryxText;
   Prism.highlightElement(oryxOutput);
+
+  // JSON output
   jsonOutput.textContent = jsonText;
   Prism.highlightElement(jsonOutput);
 
-  if (jsonText.includes('"error"')) {
-    tokenSavings.textContent = 'Parse error — revisa la sintaxis ORYX';
-    tokenSavings.classList.remove('hidden', 'bg-green-900', 'text-green-300');
-    tokenSavings.classList.add('bg-red-900', 'text-red-300');
-    oryxOutput.classList.add('error-border');
+  const isError = jsonText.startsWith('//') || oryxText.startsWith('Error');
+
+  if (isError) {
+    oryxPanel.classList.add('error-border');
+    savingsPct.textContent = 'Parse error';
+    savingsBar.style.width = '0%';
+    oryxTokenBadge.textContent = '—';
+    jsonTokenBadge.textContent = '—';
+    oryxTokenCount.textContent = '';
+    jsonTokenCount.textContent = '';
+    downloadOryx.disabled = true;
+    downloadJson.disabled = true;
   } else {
-    const oryxTokens = countTokens(oryxText);
-    const jsonTokens = countTokens(jsonText);
-    const savings = jsonTokens > 0 ? Math.round(((jsonTokens - oryxTokens) / jsonTokens) * 100) : 0;
-    tokenSavings.textContent = `Ahorro: ${savings}%`;
-    tokenSavings.classList.remove('hidden', 'bg-red-900', 'text-red-300');
-    tokenSavings.classList.add('bg-green-900', 'text-green-300');
+    oryxPanel.classList.remove('error-border');
+    const ot = countTokens(oryxText);
+    const jt = countTokens(jsonText);
+    const pct = jt > 0 ? Math.round(((jt - ot) / jt) * 100) : 0;
+
+    savingsPct.textContent = `${pct}% saved`;
+    savingsBar.style.width = `${Math.max(0, pct)}%`;
+    oryxTokenBadge.textContent = `${ot} TOKENS`;
+    jsonTokenBadge.textContent = `${jt} TOKENS`;
+    oryxTokenCount.textContent = `ORYX: ${ot} tokens`;
+    jsonTokenCount.textContent = `JSON: ${jt} tokens`;
+
     downloadOryx.disabled = false;
     downloadJson.disabled = false;
+
+    // wire download buttons
+    downloadOryx.onclick = () => downloadFile('data.oryx', oryxText);
+    downloadJson.onclick = () => downloadFile('data.json', jsonText);
   }
 }
 
-async function handleConversion(mode) {
+window.handleConversion = async function(mode) {
   const input = naturalInput.value.trim();
-  if (!input) {
-    jsonOutput.textContent = 'Por favor, ingresa datos para comenzar la conversión.';
-    return;
-  }
+  if (!input) return;
 
   if (mode === 'json') {
-    // JSON → ORYX: 100% local con oryx-parser, sin API call
-    showLoading('Convirtiendo JSON → ORYX...');
+    showLoading('Converting…');
     const { result, error } = jsonToOryx(input);
     if (error) {
-      oryxOutput.textContent = '';
-      jsonOutput.textContent = error;
-      stopLoading('🔄 Convertir ORYX (Desde JSON Pegado)');
+      showResults('', `// Invalid JSON: ${error}`);
+    } else {
+      const jsonBack = oryxToJson(result);
+      showResults(result, jsonBack);
+    }
+    stopLoading();
+    buttonText.textContent = 'Convert JSON → ORYX';
+  } else {
+    if (!apiKey) {
+      showResults('', '// Add your Gemini API key in src/main.js to use Natural Language mode.');
+      stopLoading();
+      buttonText.textContent = 'Generate ORYX';
       return;
     }
-    const jsonBack = oryxToJson(result);
-    displayResults(result, jsonBack);
-    stopLoading('🔄 Convertir ORYX (Desde JSON Pegado)');
-  } else {
-    // Natural language → ORYX: usa Gemini
-    showLoading('Generando ORYX desde Lenguaje Natural...');
-    const oryxText = await callGemini(
-      ORYX_SPEC_NATURAL,
-      `Convierte esta descripción a ORYX v0.1: ${input}`
-    );
+    showLoading('Generating with AI…');
+    const oryxText = await callGemini(`Convert to ORYX v0.3: ${input}`);
     const jsonText = oryxText.startsWith('Error')
-      ? 'No se pudo validar el JSON debido al error de generación ORYX.'
+      ? `// ${oryxText}`
       : oryxToJson(oryxText);
-    displayResults(oryxText, jsonText);
-    stopLoading('🤖 Generar ORYX (Desde Lenguaje Natural)');
+    showResults(oryxText, jsonText);
+    stopLoading();
+    buttonText.textContent = 'Generate ORYX';
   }
-}
+};
+
+window.copyToClipboard = function(id) {
+  const text = document.getElementById(id)?.textContent;
+  if (text) navigator.clipboard?.writeText(text);
+};
 
 function downloadFile(filename, content) {
-  const blob = new Blob([content], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([content], { type: 'text/plain' })),
+    download: filename,
+  });
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
-
-// Exponer funciones al HTML (onclick attrs)
-window.handleConversion = handleConversion;
 window.downloadFile = downloadFile;
