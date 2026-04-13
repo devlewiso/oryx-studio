@@ -191,15 +191,15 @@
 
         <!-- Mode Tabs -->
         <div class="flex bg-surface-container-low p-1 rounded-lg w-fit gap-1">
-          <button id="tabNatural"
-            class="px-4 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded tab-inactive transition-all"
-            onclick="setTab('natural')">
-            Natural Language
-          </button>
-          <button id="tabJson"
+          <button id="tabJsonToOryx"
             class="px-4 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded tab-active transition-all"
-            onclick="setTab('json')">
+            onclick="setTab('json-to-oryx')">
             JSON → ORYX
+          </button>
+          <button id="tabOryxToJson"
+            class="px-4 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded tab-inactive transition-all"
+            onclick="setTab('oryx-to-json')">
+            ORYX → JSON
           </button>
         </div>
 
@@ -228,18 +228,13 @@
           <!-- Buttons -->
           <div class="p-4 bg-surface-container-low/30 flex items-center gap-3 flex-wrap">
             <button id="convertButton"
-              onclick="handleConversion(window.currentMode)"
+              onclick="handleConversion()"
               class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-2.5 rounded text-sm font-bold flex items-center gap-2 hover:scale-[0.98] transition-transform active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed">
               <svg id="spinner" class="spinner hidden w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
               </svg>
               <span class="material-symbols-outlined text-[18px]" id="btnIcon">auto_awesome</span>
               <span id="buttonText">Convert JSON → ORYX</span>
-            </button>
-            <button id="reverseButton"
-              onclick="handleConversion('natural')"
-              class="px-5 py-2.5 rounded text-sm font-medium border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors disabled:opacity-50 disabled:cursor-not-allowed hidden">
-              Generate from Natural Language
             </button>
           </div>
         </div>
@@ -266,7 +261,7 @@
         <!-- ORYX Output -->
         <div class="p-6 border-b border-outline-variant/10">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-[11px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">ORYX Output</h3>
+            <h3 id="oryxHeader" class="text-[11px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">ORYX Output</h3>
             <div class="flex items-center gap-3">
               <span id="oryxTokenBadge" class="bg-secondary/10 text-secondary text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-secondary/20"></span>
               <button onclick="copyToClipboard('oryxOutput')" title="Copy" class="material-symbols-outlined text-outline hover:text-white transition-colors text-[18px]">content_copy</button>
@@ -295,7 +290,7 @@
         <!-- JSON Equivalent -->
         <div class="p-6">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-[11px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">JSON Equivalent</h3>
+            <h3 id="jsonHeader" class="text-[11px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">JSON Equivalent</h3>
             <div class="flex items-center gap-3">
               <span id="jsonTokenBadge" class="bg-error/10 text-error text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-error/20"></span>
               <button onclick="copyToClipboard('jsonOutput')" title="Copy" class="material-symbols-outlined text-outline hover:text-white transition-colors text-[18px]">content_copy</button>
